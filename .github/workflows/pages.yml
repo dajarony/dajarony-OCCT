@@ -25,11 +25,16 @@ jobs:
       - name: Install Blender
         run: |
           sudo apt-get update
-          sudo apt-get install -y blender
+          sudo apt-get install -y blender python3-numpy
       - name: Generate Blender HD mascot
-        run: blender -b --python tools/build_avocado_blender.py
+        run: |
+          blender -b --python-exit-code 1 --python tools/build_avocado_blender.py
+          test -s public/avocado-blender.glb
+          ls -lh public/avocado-blender.glb
       - run: npm install
       - run: npm run build
+      - name: Verify Blender asset reached dist
+        run: test -s dist/avocado-blender.glb
       - uses: actions/upload-pages-artifact@v4
         with:
           path: dist
