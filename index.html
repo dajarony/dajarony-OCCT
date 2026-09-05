@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#111827" />
+    <title>Dajarony OCCT Lab</title>
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="panel controls">
+        <p class="eyebrow">Open CASCADE · WebAssembly</p>
+        <h1>CAD paramétrico en vivo</h1>
+        <p class="intro">Cambia las dimensiones. OCCT regenera un sólido B-Rep real y el visor actualiza el modelo.</p>
+
+        <div class="field-grid">
+          <label>Longitud <span id="widthValue">120</span> mm
+            <input id="width" type="range" min="60" max="200" step="5" value="120" />
+          </label>
+          <label>Fondo <span id="depthValue">80</span> mm
+            <input id="depth" type="range" min="40" max="150" step="5" value="80" />
+          </label>
+          <label>Altura <span id="heightValue">40</span> mm
+            <input id="height" type="range" min="20" max="100" step="5" value="40" />
+          </label>
+          <label>Radio del vaciado <span id="radiusValue">24</span> mm
+            <input id="radius" type="range" min="8" max="45" step="1" value="24" />
+          </label>
+        </div>
+
+        <button id="rebuild" type="button" disabled>Inicializando OCCT…</button>
+        <p id="status" class="status" role="status">Cargando el motor CAD WebAssembly.</p>
+
+        <div class="formula">
+          <strong>Operación CAD</strong>
+          <code>Box(width, depth, height) − Sphere(center, radius)</code>
+        </div>
+      </section>
+
+      <section class="panel viewer-panel">
+        <model-viewer
+          id="viewer"
+          camera-controls
+          enable-pan
+          shadow-intensity="0.8"
+          environment-image="neutral"
+          interaction-prompt="none"
+          alt="Modelo CAD generado con Open CASCADE">
+        </model-viewer>
+      </section>
+    </main>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
