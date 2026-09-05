@@ -1,6 +1,7 @@
 import "./style.css";
 import "@google/model-viewer";
-import initOpenCascade from "opencascade.js";
+import initOpenCascade from "opencascade.js/dist/opencascade.full.js";
+import openCascadeWasm from "opencascade.js/dist/opencascade.full.wasm?url";
 
 const viewer = document.querySelector("#viewer");
 const status = document.querySelector("#status");
@@ -15,7 +16,6 @@ let spinning = true;
 
 const palette = {
   skinDark: "#3E7D2F",
-  skinMid: "#6ABF4B",
   flesh: "#CDEB6B",
   fleshLight: "#FFF8B0",
   cream: "#F9D7C0",
@@ -41,8 +41,6 @@ function rotationMatrix(rx = 0, ry = 0, rz = 0) {
   const cx = Math.cos(rx), sx = Math.sin(rx);
   const cy = Math.cos(ry), sy = Math.sin(ry);
   const cz = Math.cos(rz), sz = Math.sin(rz);
-
-  // Rz * Ry * Rx
   return [
     [cz * cy, cz * sy * sx - sz * cx, cz * sy * cx + sz * sx],
     [sz * cy, sz * sy * sx + cz * cx, sz * sy * cx - cz * sx],
@@ -52,16 +50,12 @@ function rotationMatrix(rx = 0, ry = 0, rz = 0) {
 
 function ellipsoid(center, radii, rotation = [0, 0, 0]) {
   const sphere = new oc.BRepPrimAPI_MakeSphere_1(1).Shape();
-  const [rx, ry, rz] = rotation;
-  const r = rotationMatrix(rx, ry, rz);
-  const [sx, sy, sz] = radii;
-
+  const r = rotationMatrix(...rotation);
   const g = new oc.gp_GTrsf();
-  const scales = [sx, sy, sz];
 
   for (let row = 0; row < 3; row++) {
     for (let col = 0; col < 3; col++) {
-      g.SetValue(row + 1, col + 1, r[row][col] * scales[col]);
+      g.SetValue(row + 1, col + 1, r[row][col] * radii[col]);
     }
   }
 
@@ -69,7 +63,6 @@ function ellipsoid(center, radii, rotation = [0, 0, 0]) {
   g.SetValue(2, 4, center[1]);
   g.SetValue(3, 4, center[2]);
   g.SetForm();
-
   return new oc.BRepBuilderAPI_GTransform_2(sphere, g, true).Shape();
 }
 
@@ -100,15 +93,12 @@ function addPart(doc, part, index) {
   const shapeTool = oc.XCAFDoc_DocumentTool.ShapeTool(doc.Main()).get();
   const label = shapeTool.NewShape();
   shapeTool.SetShape(label, part.shape);
-
   new oc.BRepMesh_IncrementalMesh_2(part.shape, 0.65, false, 0.32, false);
 
-  // Use XCAF visual materials so the colors survive the GLB export.
   const materialTool = oc.XCAFDoc_DocumentTool.VisMaterialTool(label).get();
   const material = new oc.XCAFDoc_VisMaterial();
-  const materialHandle = new oc.Handle_XCAFDoc_VisMaterial_2(material);
   const materialLabel = materialTool.AddMaterial_1(
-    materialHandle,
+    new oc.Handle_XCAFDoc_VisMaterial_2(material),
     new oc.TCollection_AsciiString_2(`${part.name}-${index}`),
   );
   materialTool.SetShapeMaterial_1(label, materialLabel);
@@ -122,20 +112,20 @@ function addPart(doc, part, index) {
 function buildCharacter() {
   const parts = [];
 
-  // --- Main avocado silhouette ------------------------------------------------
+  // Avocado silhouette: three overlapping B-Rep ellipsoids make the pear shape.
   parts.push({ name: "body-lower", shape: ellipsoid([0, 0, 55], [35, 18, 43]), color: palette.skinDark });
   parts.push({ name: "body-upper", shape: ellipsoid([0, 0, 88], [26, 16, 31]), color: palette.skinDark });
   parts.push({ name: "body-crown", shape: ellipsoid([0, 0, 108], [16, 13, 18]), color: palette.skinDark });
 
-  // Inner flesh is intentionally a raised front layer; it stays readable from 3/4 view.
+  // Raised inner flesh layer.
   parts.push({ name: "flesh-lower", shape: ellipsoid([0, 16.8, 56], [28, 5.2, 35]), color: palette.flesh });
   parts.push({ name: "flesh-upper", shape: ellipsoid([0, 15.8, 86], [21.5, 4.8, 25]), color: palette.fleshLight });
 
-  // Pit + highlight.
+  // Pit and glossy highlight.
   parts.push({ name: "pit", shape: ellipsoid([0, 23.5, 53], [15.5, 7.8, 17]), color: palette.pit });
   parts.push({ name: "pit-highlight", shape: ellipsoid([-5.2, 30.7, 61], [3.2, 1.2, 4.4], [0, 0, -0.45]), color: palette.cream });
 
-  // Face.
+  // Kawaii face.
   parts.push({ name: "eye-left", shape: ellipsoid([-10.5, 21.8, 88], [3.4, 2.2, 5.2]), color: palette.black });
   parts.push({ name: "eye-right", shape: ellipsoid([10.5, 21.8, 88], [3.4, 2.2, 5.2]), color: palette.black });
   parts.push({ name: "eye-left-glint", shape: ellipsoid([-11.4, 24.0, 90.2], [1.0, 0.7, 1.4]), color: palette.white });
@@ -145,46 +135,40 @@ function buildCharacter() {
   parts.push({ name: "mouth", shape: ellipsoid([0, 22.4, 78.2], [5.2, 2.0, 3.7]), color: palette.black });
   parts.push({ name: "tongue", shape: ellipsoid([0, 24.1, 76.8], [2.7, 0.9, 1.8]), color: palette.tongue });
 
-  // Arms and hands.
+  // Arms and feet.
   capsule(parts, "arm-left", [-29, 1, 68], [-42, 5, 73], 4.1, palette.skinDark);
   capsule(parts, "arm-right", [29, 1, 68], [42, 5, 73], 4.1, palette.skinDark);
-
-  // Feet.
   parts.push({ name: "foot-left", shape: ellipsoid([-16, 1, 13], [9, 10, 4.8], [0, 0.10, -0.10]), color: palette.skinDark });
   parts.push({ name: "foot-right", shape: ellipsoid([16, 1, 13], [9, 10, 4.8], [0, -0.10, 0.10]), color: palette.skinDark });
 
-  // Decorative avocado freckles / darker skin dots.
-  const freckles = [
+  // Skin freckles.
+  [
     [-29, 12, 44, 1.7], [-31, 10, 61, 1.3], [-27, 13, 82, 1.5],
     [29, 12, 48, 1.4], [31, 10, 65, 1.8], [27, 13, 89, 1.3],
     [-22, 14, 102, 1.1], [22, 14, 103, 1.1],
-  ];
-  freckles.forEach(([x, y, z, s], i) => {
+  ].forEach(([x, y, z, s], i) => {
     parts.push({ name: `freckle-${i}`, shape: ellipsoid([x, y, z], [s, 1.0, s]), color: palette.leafDark });
   });
 
-  // --- Leaf hat ---------------------------------------------------------------
+  // Leaf hat and its scalloped brim.
   parts.push({ name: "hat-brim", shape: ellipsoid([0, 0, 116.2], [34, 19.5, 4.3]), color: palette.cream });
   parts.push({ name: "hat-crown", shape: ellipsoid([0, 0.2, 119.6], [26, 15.3, 5.0]), color: "#FFD9AF" });
-
-  // Wavy brim: a ring of soft lobes around the hat edge.
-  const brimLobes = [
+  [
     [-28, 0, 114.8, 8, 8, 4.4], [28, 0, 114.8, 8, 8, 4.4],
     [-22, 12, 114.4, 9, 6, 4.0], [22, 12, 114.4, 9, 6, 4.0],
     [-22, -12, 114.4, 9, 6, 4.0], [22, -12, 114.4, 9, 6, 4.0],
     [-8, 17, 114.5, 10, 5, 4.0], [8, 17, 114.5, 10, 5, 4.0],
     [-8, -17, 114.5, 10, 5, 4.0], [8, -17, 114.5, 10, 5, 4.0],
-  ];
-  brimLobes.forEach(([x, y, z, sx, sy, sz], i) => {
+  ].forEach(([x, y, z, sx, sy, sz], i) => {
     parts.push({ name: `hat-lobe-${i}`, shape: ellipsoid([x, y, z], [sx, sy, sz]), color: palette.cream });
   });
 
-  // Curled stem approximation: two rounded angled segments.
+  // Curled stem approximation.
   capsule(parts, "stem-a", [0, 0, 122], [-3.0, 0, 134], 3.2, palette.pit);
   capsule(parts, "stem-b", [-3.0, 0, 134], [4.3, 0, 137], 3.0, palette.pit);
   parts.push({ name: "stem-tip", shape: ellipsoid([6.2, 0, 135.5], [3.4, 3.4, 3.4]), color: palette.pit });
 
-  // Leaf and its central vein.
+  // Leaf plus veins.
   parts.push({ name: "leaf", shape: ellipsoid([15, 0.5, 133.5], [14, 3.1, 7.2], [0, -0.42, 0]), color: palette.leaf });
   capsule(parts, "leaf-vein", [4.5, 3.3, 129.5], [24.0, 3.3, 137.2], 0.75, palette.leafDark);
   capsule(parts, "leaf-vein-a", [13.0, 3.1, 133.2], [16.0, 3.1, 139.0], 0.45, palette.leafDark);
@@ -204,7 +188,6 @@ function exportParts(parts) {
     new oc.TColStd_IndexedDataMapOfStringString_1(),
     new oc.Message_ProgressRange_1(),
   );
-
   if (!ok) throw new Error("OCCT no pudo exportar el personaje a GLB.");
 
   const glb = oc.FS.readFile(path, { encoding: "binary" });
@@ -218,7 +201,6 @@ async function rebuild() {
   status.textContent = "Construyendo el aguacate con sólidos B-Rep de OCCT…";
 
   try {
-    // Yield one frame so the status is visible before the WASM work starts.
     await new Promise((resolve) => requestAnimationFrame(resolve));
     const parts = buildCharacter();
     status.textContent = `Mallando y aplicando materiales PBR a ${parts.length} piezas…`;
@@ -228,7 +210,6 @@ async function rebuild() {
     viewer.src = nextUrl;
     if (currentObjectUrl) URL.revokeObjectURL(currentObjectUrl);
     currentObjectUrl = nextUrl;
-
     status.textContent = `Listo · ${parts.length} piezas CAD · OCCT → GLB → model-viewer`;
   } catch (error) {
     console.error(error);
@@ -239,18 +220,15 @@ async function rebuild() {
 }
 
 rebuildButton.addEventListener("click", rebuild);
-
 spinButton.addEventListener("click", () => {
   spinning = !spinning;
   viewer.toggleAttribute("auto-rotate", spinning);
   spinButton.textContent = spinning ? "⏸ Pausar giro" : "▶ Girar";
 });
-
 frontButton.addEventListener("click", () => {
   viewer.cameraOrbit = "0deg 78deg 170%";
   viewer.jumpCameraToGoal?.();
 });
-
 threeQuarterButton.addEventListener("click", () => {
   viewer.cameraOrbit = "-32deg 72deg 175%";
   viewer.jumpCameraToGoal?.();
@@ -259,7 +237,9 @@ threeQuarterButton.addEventListener("click", () => {
 async function boot() {
   try {
     status.textContent = "Cargando OpenCascade.js / WebAssembly…";
-    oc = await initOpenCascade();
+    oc = await initOpenCascade({
+      locateFile: (path) => (path.endsWith(".wasm") ? openCascadeWasm : path),
+    });
     rebuildButton.disabled = false;
     await rebuild();
   } catch (error) {
