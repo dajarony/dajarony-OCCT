@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0e190d" />
+  <title>Aguacate 3D · Blender HD</title>
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <style>
+    *{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 50% 20%,#203b1d 0,#0b160b 58%,#060b06 100%);color:#eef8dd;font-family:Inter,system-ui,sans-serif;min-height:100vh}.wrap{min-height:100vh;display:grid;grid-template-columns:minmax(280px,360px) 1fr;gap:18px;padding:24px;max-width:1500px;margin:auto}.panel{border:1px solid #385a2a;background:#10200fdd;border-radius:24px;overflow:hidden}.info{padding:26px}.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:#a9e65d}.info h1{font-size:42px;line-height:1;margin:12px 0}.info p{line-height:1.6;color:#cee6b2}.tag{display:inline-block;padding:8px 11px;border:1px solid #456a31;border-radius:999px;margin:4px 4px 4px 0;color:#dffcaa;font-size:13px}.actions{display:grid;gap:10px;margin-top:24px}.actions button,.actions a{border:0;border-radius:13px;padding:13px 14px;font-weight:800;text-align:center;text-decoration:none;cursor:pointer}.primary{background:#c9ef5d;color:#17200d}.secondary{background:#62bf42;color:#10220c}.ghost{background:#1b2d19;color:#ecf9db;border:1px solid #3b5c2c!important}.viewer{position:relative;min-height:760px}.badge{position:absolute;left:18px;top:18px;z-index:2;border:1px solid #496e34;background:#10200fdd;padding:7px 11px;border-radius:999px;color:#d8f5a8;font-size:12px}model-viewer{width:100%;height:100%;min-height:760px;background:radial-gradient(circle at 50% 42%,#243d1d 0,#101d0f 55%,#081008 100%);--progress-bar-color:#c9ef5d}.note{margin-top:20px;padding:14px;border-radius:14px;background:#0a1509;border:1px solid #2c4722;font-size:13px;color:#bcd49f}@media(max-width:900px){.wrap{grid-template-columns:1fr;padding:12px}.viewer,model-viewer{min-height:580px}.info h1{font-size:34px}}
+  </style>
+</head>
+<body>
+  <main class="wrap">
+    <section class="panel info">
+      <div class="eyebrow">Blender · Organic modeling · GLB</div>
+      <h1>Aguacate HD</h1>
+      <p>Segunda prueba del mismo personaje, esta vez con geometría orgánica suave, cuerpo continuo, sombrero ondulado real, curvas Bézier para brazos y tallo, materiales PBR y una malla mucho más densa.</p>
+      <div><span class="tag">Organic mesh</span><span class="tag">PBR</span><span class="tag">Bezier</span><span class="tag">High-poly</span><span class="tag">GLB</span></div>
+      <div class="actions">
+        <button id="spin" class="primary">⏸ Pausar giro</button>
+        <button id="front" class="secondary">Frente</button>
+        <button id="three" class="ghost">Vista 3/4</button>
+        <a class="ghost" href="./">← Ver versión OCCT</a>
+      </div>
+      <div class="note">Este modelo se genera automáticamente con Blender en GitHub Actions. No sustituye OCCT: lo complementa para personajes y formas orgánicas.</div>
+    </section>
+    <section class="panel viewer">
+      <div class="badge">Blender HD · live GLB</div>
+      <model-viewer id="viewer" src="./avocado-blender.glb" camera-controls enable-pan auto-rotate auto-rotate-delay="0" rotation-per-second="16deg" shadow-intensity="1.25" shadow-softness="0.85" exposure="1.08" environment-image="neutral" interaction-prompt="none" camera-orbit="-28deg 72deg 170%" min-camera-orbit="auto auto 80%" max-camera-orbit="auto auto 350%" alt="Modelo 3D orgánico de un personaje aguacate creado con Blender"></model-viewer>
+    </section>
+  </main>
+  <script>
+    const v=document.querySelector('#viewer');let spinning=true;
+    document.querySelector('#spin').onclick=(e)=>{spinning=!spinning;v.toggleAttribute('auto-rotate',spinning);e.currentTarget.textContent=spinning?'⏸ Pausar giro':'▶ Girar'};
+    document.querySelector('#front').onclick=()=>{v.cameraOrbit='0deg 78deg 165%';v.jumpCameraToGoal?.()};
+    document.querySelector('#three').onclick=()=>{v.cameraOrbit='-30deg 72deg 170%';v.jumpCameraToGoal?.()};
+  </script>
+</body>
+</html>
