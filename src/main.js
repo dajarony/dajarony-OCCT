@@ -51,7 +51,10 @@ function rotationMatrix(rx = 0, ry = 0, rz = 0) {
 function ellipsoid(center, radii, rotation = [0, 0, 0]) {
   const sphere = new oc.BRepPrimAPI_MakeSphere_1(1).Shape();
   const r = rotationMatrix(...rotation);
-  const g = new oc.gp_GTrsf();
+
+  // In OpenCascade.js the public base class gp_GTrsf is not directly
+  // constructible through Embind. Use its concrete zero-argument overload.
+  const g = new oc.gp_GTrsf_1();
 
   for (let row = 0; row < 3; row++) {
     for (let col = 0; col < 3; col++) {
@@ -67,9 +70,8 @@ function ellipsoid(center, radii, rotation = [0, 0, 0]) {
 }
 
 function makeDir(x, y, z) {
-  const dir = new oc.gp_Dir();
-  dir.SetCoord_2(x, y, z);
-  return dir;
+  // gp_Dir_4 is the explicit (x, y, z) constructor in OpenCascade.js.
+  return new oc.gp_Dir_4(x, y, z);
 }
 
 function cylinderBetween(a, b, radius) {
@@ -77,9 +79,10 @@ function cylinderBetween(a, b, radius) {
   const dy = b[1] - a[1];
   const dz = b[2] - a[2];
   const length = Math.hypot(dx, dy, dz);
-  const axis = new oc.gp_Ax2();
-  axis.SetLocation(new oc.gp_Pnt_3(a[0], a[1], a[2]));
-  axis.SetDirection(makeDir(dx, dy, dz));
+  const point = new oc.gp_Pnt_3(a[0], a[1], a[2]);
+  const dir = makeDir(dx, dy, dz);
+  // gp_Ax2_3(P, V) avoids constructing the abstract/base binding directly.
+  const axis = new oc.gp_Ax2_3(point, dir);
   return new oc.BRepPrimAPI_MakeCylinder_3(axis, radius, length).Shape();
 }
 
