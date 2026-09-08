@@ -4,22 +4,22 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#152313" />
-    <title>Dajarony OCCT · Aguacate 3D</title>
+    <title>Dajarony OCCT · Auralis 3D</title>
   </head>
   <body>
     <main class="app-shell">
       <section class="panel controls">
-        <p class="eyebrow">Open CASCADE · WebAssembly</p>
-        <h1>Aguacate 3D</h1>
+        <p class="eyebrow">Open CASCADE · WebAssembly · Auralis</p>
+        <h1>Auralis OCCT</h1>
         <p class="intro">
-          Prueba compleja inspirada en tu personaje: cuerpo, pulpa, hueso, cara,
-          brazos, pies, sombrero ondulado, tallo y hoja. La geometría se genera
-          con OCCT y se exporta a GLB en el navegador.
+          Muestra 3D hecha únicamente con OCCT/OpenCascade.js, tomando como referencia
+          el personaje de Auralis Compra: silueta de aguacate, pulpa, hueso, guiño,
+          mejillas, brazos, pies, sombrero ondulado, tallo rizado y hoja.
         </p>
 
         <div class="feature-grid">
-          <div><strong>CAD</strong><span>B-Rep real</span></div>
-          <div><strong>Color</strong><span>PBR / XCAF</span></div>
+          <div><strong>Motor</strong><span>OCCT real</span></div>
+          <div><strong>Geometría</strong><span>B-Rep</span></div>
           <div><strong>Salida</strong><span>GLB</span></div>
           <div><strong>Visor</strong><span>model-viewer</span></div>
         </div>
@@ -38,14 +38,14 @@
         <div class="formula">
           <strong>Qué estamos probando</strong>
           <p>
-            Primitivas + transformaciones no uniformes + múltiples sólidos +
-            materiales XCAF + mallado + exportación GLB.
+            Hasta dónde podemos llevar un personaje orgánico usando sólo sólidos y
+            transformaciones B-Rep de Open CASCADE, sin Blender.
           </p>
         </div>
       </section>
 
       <section class="panel viewer-panel">
-        <div class="viewer-badge">OCCT live model</div>
+        <div class="viewer-badge">Auralis · OCCT live model</div>
         <model-viewer
           id="viewer"
           camera-controls
@@ -53,18 +53,18 @@
           auto-rotate
           auto-rotate-delay="0"
           rotation-per-second="18deg"
-          shadow-intensity="1"
-          shadow-softness="0.8"
-          exposure="1.05"
+          shadow-intensity="1.15"
+          shadow-softness="0.85"
+          exposure="1.08"
           environment-image="neutral"
           interaction-prompt="none"
-          camera-orbit="-32deg 72deg 175%"
-          min-camera-orbit="auto auto 90%"
+          camera-orbit="-30deg 72deg 170%"
+          min-camera-orbit="auto auto 85%"
           max-camera-orbit="auto auto 350%"
-          alt="Modelo CAD 3D de un personaje aguacate generado con Open CASCADE">
+          alt="Modelo CAD 3D de Auralis generado únicamente con Open CASCADE">
         </model-viewer>
       </section>
     </main>
-    <script type="module" src="/src/main.js"></script>
+    <script type="module" src="/src/auralis-occt.js"></script>
   </body>
 </html>
