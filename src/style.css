@@ -113,6 +113,23 @@ button:focus-visible { outline: 3px solid #fff8b0; outline-offset: 2px; }
 .formula strong { display: block; margin-bottom: 7px; color: #fff8b0; }
 .formula p { color: #aebba8; line-height: 1.5; margin: 0; font-size: 13px; }
 
+.demo-link {
+  display: block;
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  color: #dff4ff;
+  background: rgba(31, 122, 205, 0.16);
+  border: 1px solid rgba(115, 193, 255, 0.28);
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 850;
+  text-align: center;
+}
+
+.demo-link:hover { background: rgba(31, 122, 205, 0.24); }
+.demo-link:focus-visible { outline: 3px solid #fff8b0; outline-offset: 2px; }
+
 .viewer-badge {
   position: absolute;
   z-index: 2;
