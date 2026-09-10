@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#07131f" />
+    <title>Dajarony OCCT · Circuito monofásico 3D</title>
+  </head>
+  <body>
+    <main class="circuit-shell">
+      <section class="panel controls-panel">
+        <p class="eyebrow">Open CASCADE · WebAssembly · Electricidad</p>
+        <h1>Circuito monofásico 3D</h1>
+        <p class="intro">
+          Maqueta CAD interactiva de un circuito básico de iluminación. Los dispositivos y
+          conductores se generan como sólidos B-Rep reales con OCCT y se exportan a GLB en el navegador.
+        </p>
+
+        <div class="legend">
+          <span><i class="dot phase"></i> L · Fase</span>
+          <span><i class="dot neutral"></i> N · Neutro</span>
+          <span><i class="dot earth"></i> PE · Tierra</span>
+        </div>
+
+        <div class="state-grid">
+          <button id="toggleQ1" class="device-button" type="button"><strong>Q1 / IGA</strong><span id="stateQ1">ON</span></button>
+          <button id="toggleId" class="device-button" type="button"><strong>F / ID</strong><span id="stateId">ON</span></button>
+          <button id="toggleQ" class="device-button" type="button"><strong>Q / Automático</strong><span id="stateQ">ON</span></button>
+          <button id="toggleS" class="device-button" type="button"><strong>S / Interruptor</strong><span id="stateS">ABIERTO</span></button>
+        </div>
+
+        <div class="sim-grid">
+          <button id="faultLeak" class="warning" type="button">⚡ Simular fuga a tierra</button>
+          <button id="faultOverload" class="warning" type="button">🔥 Simular sobrecarga</button>
+          <button id="resetCircuit" class="secondary" type="button">↻ Restablecer circuito</button>
+        </div>
+
+        <p id="status" class="status" role="status">Cargando OpenCascade.js…</p>
+
+        <div class="flow-card">
+          <strong>Recorrido de la fase</strong>
+          <p>L → Q1 → ID → Q → S → H → N</p>
+          <small>La bombilla sólo se enciende cuando Q1, ID y Q están conectados y S está cerrado.</small>
+        </div>
+
+        <div class="view-actions">
+          <button id="frontView" class="ghost" type="button">Vista frontal</button>
+          <button id="threeQuarterView" class="ghost" type="button">Vista 3/4</button>
+          <button id="spin" class="ghost" type="button">▶ Girar</button>
+        </div>
+
+        <a class="back-link" href="./">← Volver a Auralis 3D</a>
+      </section>
+
+      <section class="panel viewer-panel">
+        <div class="viewer-head">
+          <div>
+            <span class="viewer-badge">OCCT LIVE MODEL</span>
+            <strong id="lampLabel">Bombilla apagada</strong>
+          </div>
+          <span id="powerBadge" class="power-badge off">SIN CARGA</span>
+        </div>
+
+        <model-viewer
+          id="viewer"
+          camera-controls
+          enable-pan
+          interaction-prompt="none"
+          shadow-intensity="1.1"
+          shadow-softness="0.8"
+          exposure="1.05"
+          environment-image="neutral"
+          camera-orbit="0deg 80deg 150%"
+          min-camera-orbit="auto auto 70%"
+          max-camera-orbit="auto auto 320%"
+          alt="Circuito monofásico básico 3D generado con Open CASCADE">
+        </model-viewer>
+
+        <div class="component-strip" aria-label="Componentes del circuito">
+          <span>1 · Acometida</span>
+          <span>2 · Q1 / IGA</span>
+          <span>3 · F / ID</span>
+          <span>4 · Q / Automático</span>
+          <span>5 · S</span>
+          <span>6 · H</span>
+          <span>7 · PE</span>
+        </div>
+      </section>
+    </main>
+    <script type="module" src="/src/circuito-occt.js"></script>
+  </body>
+</html>
