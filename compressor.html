@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#111820" />
+    <title>Dajarony OCCT · Compresor hermético 3D</title>
+  </head>
+  <body>
+    <main class="compressor-shell">
+      <section class="panel controls">
+        <p class="eyebrow">Open CASCADE · B-Rep · GLB interactivo</p>
+        <h1>Compresor hermético 3D</h1>
+        <p class="intro">
+          Modelo didáctico paramétrico inspirado en un compresor alternativo hermético.
+          Las piezas se generan con OpenCascade.js y se exportan a GLB en el navegador.
+        </p>
+
+        <div class="control-block">
+          <div class="control-row">
+            <label for="explode">Explosión del conjunto</label>
+            <output id="explodeValue">100%</output>
+          </div>
+          <input id="explode" type="range" min="0" max="100" value="100" step="10" />
+          <div class="preset-row">
+            <button id="assembled" class="ghost" type="button">Montado</button>
+            <button id="exploded" class="ghost" type="button">Explotado</button>
+          </div>
+        </div>
+
+        <div class="parts-grid" aria-label="Partes principales">
+          <span>Carcasa</span><span>Tubos Cu</span><span>Placa válvulas</span><span>Cilindro</span>
+          <span>Pistón</span><span>Biela</span><span>Cigüeñal</span><span>Estator</span>
+          <span>Rotor</span><span>Rodamientos</span><span>Cárter aceite</span><span>Suspensión</span>
+        </div>
+
+        <div class="actions">
+          <button id="rebuild" type="button" disabled>Inicializando OCCT…</button>
+          <button id="spin" class="secondary" type="button">⏸ Pausar giro</button>
+          <div class="view-actions">
+            <button id="frontView" class="ghost" type="button">Frente</button>
+            <button id="threeQuarterView" class="ghost" type="button">Vista 3/4</button>
+          </div>
+        </div>
+
+        <p id="status" class="status" role="status">Cargando el motor CAD WebAssembly.</p>
+
+        <div class="note">
+          <strong>Objetivo</strong>
+          <p>
+            No es una copia dimensional de un fabricante. Es un modelo educativo editable para
+            estudiar cómo se relacionan motor, cigüeñal, biela, pistón, válvulas, aceite y carcasa.
+          </p>
+        </div>
+
+        <a class="back-link" href="./">← Volver a Auralis OCCT</a>
+      </section>
+
+      <section class="panel viewer-panel">
+        <div class="viewer-badge">Compresor hermético · vista explotada</div>
+        <model-viewer
+          id="viewer"
+          camera-controls
+          enable-pan
+          auto-rotate
+          auto-rotate-delay="0"
+          rotation-per-second="12deg"
+          shadow-intensity="1.25"
+          shadow-softness="0.8"
+          exposure="1.05"
+          environment-image="neutral"
+          interaction-prompt="none"
+          camera-orbit="-28deg 68deg 185%"
+          min-camera-orbit="auto auto 70%"
+          max-camera-orbit="auto auto 420%"
+          alt="Modelo 3D explotado de un compresor hermético alternativo generado con Open CASCADE">
+        </model-viewer>
+      </section>
+    </main>
+    <script type="module" src="/src/compressor-occt.js"></script>
+  </body>
+</html>

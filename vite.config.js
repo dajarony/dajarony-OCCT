@@ -8,6 +8,7 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, "index.html"),
         circuito: resolve(__dirname, "circuito.html"),
+        compressor: resolve(__dirname, "compressor.html"),
       },
     },
   },
