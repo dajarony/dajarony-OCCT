@@ -26,6 +26,9 @@ jobs:
       - name: Inspect and render Viking
         env:
           OMP_NUM_THREADS: '4'
+          # Reuse visually verified renders from run 36242568487 for this
+          # delivery pass. Set to '1' to render again after visual changes.
+          VIKING_RENDER_IMAGES: '0'
         run: blender --background --factory-startup --threads 4 --python-exit-code 1 --python tools/viking_blender.py
       - name: Upload renders and report
         if: always()

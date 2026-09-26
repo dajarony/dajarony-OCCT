@@ -3,6 +3,7 @@ import bpy
 import json
 import math
 import hashlib
+import os
 from pathlib import Path
 from mathutils import Vector, Matrix
 
@@ -10,6 +11,7 @@ ROOT = Path(__file__).resolve().parent.parent
 SOURCE = ROOT / 'assets/viking/source.glb'
 OUT = ROOT / 'output/viking'
 OUT.mkdir(parents=True, exist_ok=True)
+RENDER_IMAGES = os.environ.get('VIKING_RENDER_IMAGES', '1') != '0'
 
 bpy.ops.object.select_all(action='SELECT')
 bpy.ops.object.delete(use_global=False)
@@ -124,6 +126,9 @@ scene.collection.objects.link(camera)
 scene.camera = camera
 cam_data.type = 'ORTHO'
 cam_data.ortho_scale = 2.25
+camera.location = (3, -5, 1.45)
+aim(camera, (0, 0, .95))
+bpy.context.view_layer.update()
 
 # Save the complete editable scene, including packed source texture.
 bpy.ops.file.pack_all()
@@ -141,7 +146,8 @@ for name, loc in [('front',(0,-5,1.08)), ('three-quarter',(3,-5,1.45)), ('back',
     camera.location = loc
     aim(camera, (0,0,.95))
     scene.render.filepath = str(OUT / f'hero-{name}.png')
-    bpy.ops.render.render(write_still=True)
+    if RENDER_IMAGES:
+        bpy.ops.render.render(write_still=True)
 
 # Preserve the hero source while creating a lighter, optional use variant.
 optimized = []
@@ -169,6 +175,23 @@ bpy.ops.export_scene.gltf(filepath=str(OUT / 'Viking_Optimized.glb'), export_for
 camera.location = (3,-5,1.45)
 aim(camera, (0,0,.95))
 scene.render.filepath = str(OUT / 'optimized-three-quarter.png')
-bpy.ops.render.render(write_still=True)
+if RENDER_IMAGES:
+    bpy.ops.render.render(write_still=True)
+
+# Re-import the delivered files in Blender, checking actual exported geometry.
+report['export_validation'] = []
+for filename, expected in [('Viking_Hero.glb', report['source_triangles']), ('Viking_Optimized.glb', report['optimized_triangles'])]:
+    bpy.ops.wm.read_factory_settings(use_empty=True)
+    bpy.ops.import_scene.gltf(filepath=str(OUT / filename))
+    exported = [o for o in bpy.context.scene.objects if o.type == 'MESH']
+    count = sum(sum(len(p.vertices)-2 for p in o.data.polygons) for o in exported)
+    assert count == expected, (filename, count, expected)
+    textures = [im for im in bpy.data.images if im.size[0] == 4096 and im.size[1] == 4096]
+    assert textures, filename + ' missing 4K texture'
+    report['export_validation'].append({'file': filename, 'triangles': count, 'texture_4k': True, 'bytes': (OUT / filename).stat().st_size})
+bpy.ops.wm.open_mainfile(filepath=str(OUT / 'Viking_Studio.blend'))
+assert (bpy.context.scene.camera.location - Vector((3, -5, 1.45))).length < 0.001
+assert any(im.packed_file for im in bpy.data.images if im.size[0] == 4096)
+report['blend_reopened_with_camera_and_packed_texture'] = True
 (OUT / 'report.json').write_text(json.dumps(report, indent=2))
 print('VIKING_ENHANCEMENT_COMPLETE', json.dumps(report))
