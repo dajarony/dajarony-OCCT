@@ -23,15 +23,20 @@ height = hi.z - lo.z
 assert height > 0
 scale = 1.90 / height
 center = (lo + hi) / 2
+# Apply the normalization to evaluated world matrices in one operation. A
+# rotation after editing object properties can otherwise reuse stale matrices.
+transform = (Matrix.Rotation(-math.pi / 2, 4, 'Z')
+             @ Matrix.Scale(scale, 4)
+             @ Matrix.Translation(Vector((-center.x, -center.y, -lo.z))))
 for o in models:
-    o.location.x -= center.x
-    o.location.y -= center.y
-    o.location.z -= lo.z
-    o.location *= scale
-    o.scale *= scale
-    # The source faces +X. Turn it toward the studio's -Y front camera.
-    o.matrix_world = Matrix.Rotation(-math.pi / 2, 4, 'Z') @ o.matrix_world
+    o.matrix_world = transform @ o.matrix_world
     o.name = 'Viking_Hero'
+bpy.context.view_layer.update()
+new_corners = [o.matrix_world @ Vector(c) for o in models for c in o.bound_box]
+new_lo = Vector(tuple(min(v[i] for v in new_corners) for i in range(3)))
+new_hi = Vector(tuple(max(v[i] for v in new_corners) for i in range(3)))
+assert abs(new_lo.z) < 0.002 and abs(new_hi.z - 1.90) < 0.002, (new_lo, new_hi)
+assert abs(new_lo.x + new_hi.x) < 0.002 and abs(new_lo.y + new_hi.y) < 0.002, (new_lo, new_hi)
 
 # The original uses one 4K color atlas and one very matte material. Preserve
 # its painted detail, then add a restrained micro-bump for close Blender renders.
@@ -62,6 +67,8 @@ report = {
     'source_triangles': sum(sum(len(p.vertices)-2 for p in o.data.polygons) for o in models),
     'height_m': 1.90,
     'height_is_presentation_assumption': True,
+    'world_bounds_min': tuple(new_lo),
+    'world_bounds_max': tuple(new_hi),
     'textures': [{'name': im.name, 'width': im.size[0], 'height': im.size[1]} for im in bpy.data.images if im.size[0]],
     'stage': 'enhanced',
     'changes': ['presentation scale and orientation', 'material roughness 0.76', 'micro bump in Blender scene', 'studio lighting', 'optimized mesh variant'],
