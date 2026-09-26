@@ -4,7 +4,7 @@ import json
 import math
 import hashlib
 from pathlib import Path
-from mathutils import Vector
+from mathutils import Vector, Matrix
 
 ROOT = Path(__file__).resolve().parent.parent
 SOURCE = ROOT / 'assets/viking/source.glb'
@@ -30,7 +30,7 @@ for o in models:
     o.location *= scale
     o.scale *= scale
     # The source faces +X. Turn it toward the studio's -Y front camera.
-    o.rotation_euler.z -= math.pi / 2
+    o.matrix_world = Matrix.Rotation(-math.pi / 2, 4, 'Z') @ o.matrix_world
     o.name = 'Viking_Hero'
 
 # The original uses one 4K color atlas and one very matte material. Preserve
@@ -120,6 +120,7 @@ cam_data.ortho_scale = 2.25
 
 # Save the complete editable scene, including packed source texture.
 bpy.ops.file.pack_all()
+bpy.context.preferences.filepaths.use_file_compression = True
 bpy.ops.wm.save_as_mainfile(filepath=str(OUT / 'Viking_Studio.blend'))
 
 # Export only the character. The lights and backdrop stay in the Blend scene.

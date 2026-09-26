@@ -27,12 +27,41 @@ jobs:
         env:
           OMP_NUM_THREADS: '4'
         run: blender --background --factory-startup --threads 4 --python-exit-code 1 --python tools/viking_blender.py
-      - name: Upload results
+      - name: Upload renders and report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: viking-blender-results
-          path: output/viking/
+          name: viking-renders
+          path: |
+            output/viking/*.png
+            output/viking/*.json
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 1
+      - name: Upload hero GLB
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: viking-hero-glb
+          path: output/viking/Viking_Hero.glb
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 1
+      - name: Upload optimized GLB
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: viking-optimized-glb
+          path: output/viking/Viking_Optimized.glb
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 1
+      - name: Upload editable Blender scene
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: viking-blend-scene
+          path: output/viking/Viking_Studio.blend
           if-no-files-found: error
           retention-days: 14
           compression-level: 1
