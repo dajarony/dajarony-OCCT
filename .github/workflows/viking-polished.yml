@@ -1,0 +1,49 @@
+name: Viking full polish
+on:
+  push:
+    branches: [codex/viking-blender-enhancement]
+    paths:
+      - .github/workflows/viking-polished.yml
+      - tools/viking_polished.py
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  animate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Blender
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y blender python3-numpy
+      - name: Polish geometry, materials and render previews
+        run: blender --background --factory-startup --threads 4 --python-exit-code 1 --python tools/viking_polished.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: viking-polished-glb
+          path: output/viking-polished/Viking_Pulido.glb
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: viking-polished-blend
+          path: output/viking-polished/Viking_Pulido.blend
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: viking-polished-report
+          path: output/viking-polished/report.json
+          if-no-files-found: error
+          retention-days: 30
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: viking-polished-previews
+          path: output/viking-polished/*.png
+          if-no-files-found: error
+          retention-days: 30
