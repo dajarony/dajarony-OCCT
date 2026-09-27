@@ -5,6 +5,8 @@ on:
     paths:
       - .github/workflows/viking-polished.yml
       - tools/viking_polished.py
+      - tools/polish_geometry_materials.py
+      - tools/polish_preview.py
   workflow_dispatch:
 permissions:
   contents: read
