@@ -1,0 +1,42 @@
+name: Viking living idle
+on:
+  push:
+    branches: [codex/viking-blender-enhancement]
+    paths:
+      - .github/workflows/viking-living-idle.yml
+      - tools/viking_living_idle.py
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  animate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Blender
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y blender python3-numpy
+      - name: Animate eight-second living idle
+        run: blender --background --factory-startup --threads 4 --python-exit-code 1 --python tools/viking_living_idle.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: viking-living-idle-glb
+          path: output/viking-living-idle/Viking_Reposo_Vivo.glb
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: viking-living-idle-blend
+          path: output/viking-living-idle/Viking_Reposo_Vivo.blend
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 1
+      - uses: actions/upload-artifact@v4
+        with:
+          name: viking-living-idle-report
+          path: output/viking-living-idle/report.json
+          if-no-files-found: error
+          retention-days: 30
